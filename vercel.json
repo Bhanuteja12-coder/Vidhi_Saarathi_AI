@@ -1,6 +1,7 @@
 {
   "version": 2,
   "name": "vidhi-saarathi-ai",
+  "installCommand": "echo 'No dependencies to install'",
   "buildCommand": "echo 'No build needed for static site'",
   "outputDirectory": "frontend",
   "rewrites": [
