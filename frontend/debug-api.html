@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug Tool - Vidhi Saarathi AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1F3A93 0%, #2C4AA0 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        .content {
+            padding: 30px;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #1F3A93;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        .info-box h3 {
+            color: #1F3A93;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .info-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+        .info-value {
+            font-family: 'Courier New', monospace;
+            color: #1F3A93;
+            font-size: 0.95rem;
+        }
+        .test-section {
+            margin: 30px 0;
+        }
+        .test-button {
+            width: 100%;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #1F3A93 0%, #2C4AA0 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(31, 58, 147, 0.3);
+        }
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result-box {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-box.success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+        .result-box.error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+        .result-box.info {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            color: #0c5460;
+        }
+        .log-box {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+        .log-timestamp {
+            color: #888;
+        }
+        .log-success {
+            color: #00ff00;
+        }
+        .log-error {
+            color: #ff4444;
+        }
+        .log-info {
+            color: #4dabf7;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge.success {
+            background: #28a745;
+            color: white;
+        }
+        .badge.error {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 API Debug Tool</h1>
+            <p>Diagnose connection issues between Vercel Frontend and Render Backend</p>
+        </div>
+
+        <div class="content">
+            <!-- Environment Information -->
+            <div class="info-box">
+                <h3>📍 Environment Information</h3>
+                <div class="info-item">
+                    <span class="info-label">Current Hostname:</span>
+                    <span class="info-value" id="hostname">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Full URL:</span>
+                    <span class="info-value" id="full-url">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Protocol:</span>
+                    <span class="info-value" id="protocol">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">API Backend:</span>
+                    <span class="info-value" id="api-url">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Environment:</span>
+                    <span class="info-value" id="environment">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Test Results -->
+            <div class="test-section">
+                <h3>🧪 Connection Tests</h3>
+                
+                <button class="test-button" onclick="testBackendHealth()">
+                    🏥 Test Backend Health Check
+                </button>
+                <div id="health-result" class="result-box"></div>
+
+                <button class="test-button" onclick="testSignupAPI()">
+                    📝 Test Signup API
+                </button>
+                <div id="signup-result" class="result-box"></div>
+
+                <button class="test-button" onclick="testCORS()">
+                    🔐 Test CORS Configuration
+                </button>
+                <div id="cors-result" class="result-box"></div>
+
+                <button class="test-button" onclick="testNetwork()">
+                    🌐 Full Network Diagnostic
+                </button>
+                <div id="network-result" class="result-box"></div>
+            </div>
+
+            <!-- Log Output -->
+            <div class="info-box">
+                <h3>📋 Debug Log</h3>
+                <div class="log-box" id="log-output"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Determine API URL
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:3000' 
+            : 'https://vidhi-saarathi-ai-backend.onrender.com';
+
+        const logOutput = document.getElementById('log-output');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.innerHTML = `<span class="log-timestamp">[${timestamp}]</span> ${message}`;
+            logOutput.appendChild(entry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function showResult(elementId, type, message) {
+            const element = document.getElementById(elementId);
+            element.className = `result-box ${type}`;
+            element.innerHTML = message;
+            element.style.display = 'block';
+        }
+
+        // Initialize environment info
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('hostname').textContent = window.location.hostname;
+            document.getElementById('full-url').textContent = window.location.href;
+            document.getElementById('protocol').textContent = window.location.protocol;
+            document.getElementById('api-url').textContent = API_BASE_URL;
+            
+            const isProduction = window.location.hostname.includes('vercel.app');
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            document.getElementById('environment').textContent = isProduction ? 'Production (Vercel)' : isLocal ? 'Local Development' : 'Unknown';
+
+            log('🚀 Debug tool initialized', 'success');
+            log(`Environment: ${isProduction ? 'Vercel Production' : 'Local'}`, 'info');
+            log(`API Target: ${API_BASE_URL}`, 'info');
+        });
+
+        // Test 1: Backend Health Check
+        async function testBackendHealth() {
+            log('🏥 Testing backend health...', 'info');
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`${API_BASE_URL}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log(`Response time: ${duration}ms`, 'info');
+                log(`Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Backend is healthy: ${data.status}`, 'success');
+                    log(`Version: ${data.version}`, 'info');
+                    
+                    showResult('health-result', 'success', `
+                        <strong>✅ Backend is Online!</strong><br><br>
+                        <strong>Status:</strong> ${data.status}<br>
+                        <strong>Version:</strong> ${data.version}<br>
+                        <strong>Response Time:</strong> ${duration}ms<br>
+                        <strong>Features:</strong> ${JSON.stringify(data.features, null, 2).replace(/\n/g, '<br>')}
+                    `);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                log(`❌ Health check failed: ${error.message}`, 'error');
+                showResult('health-result', 'error', `
+                    <strong>❌ Backend Unreachable</strong><br><br>
+                    <strong>Error:</strong> ${error.message}<br><br>
+                    <strong>Possible Causes:</strong><br>
+                    • Backend server is down<br>
+                    • Network connectivity issue<br>
+                    • CORS policy blocking request<br>
+                    • Wrong backend URL
+                `);
+            }
+        }
+
+        // Test 2: Signup API
+        async function testSignupAPI() {
+            log('📝 Testing signup API...', 'info');
+            try {
+                const testData = {
+                    email: `test_${Date.now()}@example.com`,
+                    password: 'testpassword123',
+                    name: 'Test User'
+                };
+
+                log(`Sending POST to ${API_BASE_URL}/api/signup`, 'info');
+                log(`Request body: ${JSON.stringify(testData)}`, 'info');
+
+                const startTime = Date.now();
+                const response = await fetch(`${API_BASE_URL}/api/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log(`Response time: ${duration}ms`, 'info');
+                log(`Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+
+                const data = await response.json();
+                log(`Response: ${JSON.stringify(data)}`, response.ok ? 'success' : 'error');
+
+                if (data.success) {
+                    showResult('signup-result', 'success', `
+                        <strong>✅ Signup API Working!</strong><br><br>
+                        <strong>User Created:</strong> ${data.user.email}<br>
+                        <strong>User ID:</strong> ${data.user.id}<br>
+                        <strong>Token:</strong> ${data.token ? 'Generated ✓' : 'Not provided'}<br>
+                        <strong>Response Time:</strong> ${duration}ms
+                    `);
+                } else {
+                    showResult('signup-result', 'error', `
+                        <strong>⚠️ API Error</strong><br><br>
+                        <strong>Error:</strong> ${data.error}<br>
+                        <strong>Status:</strong> ${response.status}<br>
+                        <strong>Note:</strong> This might be expected (e.g., email already exists)
+                    `);
+                }
+            } catch (error) {
+                log(`❌ Signup API failed: ${error.message}`, 'error');
+                log(`Error type: ${error.name}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+                
+                showResult('signup-result', 'error', `
+                    <strong>❌ Signup Request Failed</strong><br><br>
+                    <strong>Error:</strong> ${error.message}<br>
+                    <strong>Error Type:</strong> ${error.name}<br><br>
+                    <strong>This is the ACTUAL error you're seeing!</strong><br><br>
+                    <strong>Common Causes:</strong><br>
+                    • CORS policy blocking cross-origin request<br>
+                    • Network connectivity issue<br>
+                    • Backend not accepting requests from this domain<br>
+                    • SSL/TLS certificate issue<br><br>
+                    <strong>Check browser console (F12) for more details</strong>
+                `);
+            }
+        }
+
+        // Test 3: CORS Configuration
+        async function testCORS() {
+            log('🔐 Testing CORS configuration...', 'info');
+            try {
+                log(`Making OPTIONS request to ${API_BASE_URL}/api/signup`, 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/api/signup`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'content-type',
+                        'Origin': window.location.origin
+                    }
+                });
+
+                log(`CORS preflight status: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('access-control-allow-origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('access-control-allow-methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('access-control-allow-headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('access-control-allow-credentials')
+                };
+
+                log(`CORS headers: ${JSON.stringify(corsHeaders, null, 2)}`, 'info');
+
+                const isAllowed = corsHeaders['Access-Control-Allow-Origin'] === window.location.origin || 
+                                  corsHeaders['Access-Control-Allow-Origin'] === '*';
+
+                if (isAllowed) {
+                    log('✅ CORS is properly configured', 'success');
+                    showResult('cors-result', 'success', `
+                        <strong>✅ CORS Properly Configured!</strong><br><br>
+                        <strong>Your Origin:</strong> ${window.location.origin}<br>
+                        <strong>Allowed Origin:</strong> ${corsHeaders['Access-Control-Allow-Origin']}<br>
+                        <strong>Allowed Methods:</strong> ${corsHeaders['Access-Control-Allow-Methods']}<br>
+                        <strong>Credentials:</strong> ${corsHeaders['Access-Control-Allow-Credentials']}
+                    `);
+                } else {
+                    log('❌ CORS configuration issue detected', 'error');
+                    showResult('cors-result', 'error', `
+                        <strong>❌ CORS Configuration Issue!</strong><br><br>
+                        <strong>Your Origin:</strong> ${window.location.origin}<br>
+                        <strong>Allowed Origin:</strong> ${corsHeaders['Access-Control-Allow-Origin'] || 'Not set'}<br><br>
+                        <strong>Solution:</strong> Backend needs to allow origin: ${window.location.origin}
+                    `);
+                }
+            } catch (error) {
+                log(`❌ CORS test failed: ${error.message}`, 'error');
+                showResult('cors-result', 'error', `
+                    <strong>❌ CORS Test Failed</strong><br><br>
+                    <strong>Error:</strong> ${error.message}<br><br>
+                    This might indicate a network issue or CORS blocking the preflight request.
+                `);
+            }
+        }
+
+        // Test 4: Full Network Diagnostic
+        async function testNetwork() {
+            log('🌐 Running full network diagnostic...', 'info');
+            
+            const results = {
+                health: false,
+                signup: false,
+                cors: false,
+                timing: {}
+            };
+
+            try {
+                // Test 1: Health
+                const healthStart = Date.now();
+                const healthResponse = await fetch(`${API_BASE_URL}/health`);
+                results.timing.health = Date.now() - healthStart;
+                results.health = healthResponse.ok;
+
+                // Test 2: Signup
+                const signupStart = Date.now();
+                const signupResponse = await fetch(`${API_BASE_URL}/api/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: `test${Date.now()}@example.com`, password: 'test123', name: 'Test' })
+                });
+                results.timing.signup = Date.now() - signupStart;
+                results.signup = signupResponse.ok || signupResponse.status === 409;
+
+                // Test 3: CORS
+                const corsResponse = await fetch(`${API_BASE_URL}/api/signup`, { method: 'OPTIONS' });
+                results.cors = corsResponse.ok;
+
+                const allPassed = results.health && results.signup && results.cors;
+                
+                log(`Full diagnostic complete: ${allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'}`, allPassed ? 'success' : 'error');
+                
+                showResult('network-result', allPassed ? 'success' : 'error', `
+                    <strong>${allPassed ? '✅' : '⚠️'} Network Diagnostic Complete</strong><br><br>
+                    <span class="badge ${results.health ? 'success' : 'error'}">${results.health ? '✅' : '❌'} Health Check (${results.timing.health}ms)</span><br>
+                    <span class="badge ${results.signup ? 'success' : 'error'}">${results.signup ? '✅' : '❌'} Signup API (${results.timing.signup}ms)</span><br>
+                    <span class="badge ${results.cors ? 'success' : 'error'}">${results.cors ? '✅' : '❌'} CORS Configuration</span><br><br>
+                    ${allPassed ? 
+                        '<strong>🎉 All systems operational!</strong><br>Your signup should work now.' : 
+                        '<strong>⚠️ Issues detected.</strong><br>Check individual test results above for details.'}
+                `);
+            } catch (error) {
+                log(`❌ Network diagnostic failed: ${error.message}`, 'error');
+                showResult('network-result', 'error', `
+                    <strong>❌ Network Diagnostic Failed</strong><br><br>
+                    <strong>Error:</strong> ${error.message}<br><br>
+                    Unable to complete full diagnostic. Check individual tests above.
+                `);
+            }
+        }
+    </script>
+</body>
+</html>
