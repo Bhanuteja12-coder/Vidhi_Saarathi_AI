@@ -9,14 +9,35 @@ const app = express();
 
 // Middleware
 app.use(cors({
-    origin: [
-        'http://localhost:3000',
-        'http://localhost:5500',
-        'http://127.0.0.1:5500',
-        'https://vidhi-saarathi-ai.vercel.app',
-        'https://vidhi-saarathi-ai1.vercel.app',
-        'https://vidhi-saarathi-ai-git-main.vercel.app'
-    ],
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        // Allowed origins
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'http://localhost:5500',
+            'http://127.0.0.1:5500',
+            /^https:\/\/.*\.vercel\.app$/,  // All Vercel deployments
+            'https://vidhi-saarathi-ai.vercel.app',
+            'https://vidhi-saarathi-ai1.vercel.app'
+        ];
+        
+        // Check if origin is allowed
+        const isAllowed = allowedOrigins.some(allowed => {
+            if (allowed instanceof RegExp) {
+                return allowed.test(origin);
+            }
+            return allowed === origin;
+        });
+        
+        if (isAllowed) {
+            callback(null, true);
+        } else {
+            console.log('❌ CORS blocked origin:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
