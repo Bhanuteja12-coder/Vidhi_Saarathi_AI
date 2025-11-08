@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📄 Upload FIR/Legal Document | Vidhi Saarathi AI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1F3A93;
+            --secondary: #D4AF37;
+            --success: #27AE60;
+            --bg: #F9F9F6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: var(--bg);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+        }
+
+        .upload-card {
+            background: white;
+            border: 3px solid var(--secondary);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(31, 58, 147, 0.1);
+        }
+
+        .upload-area {
+            border: 3px dashed var(--secondary);
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .upload-area:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--primary);
+        }
+
+        .upload-area.dragover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--success);
+        }
+
+        .upload-icon { font-size: 4rem; color: var(--secondary); margin-bottom: 1rem; }
+        .file-input { display: none; }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary), #2C4AA0);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(31, 58, 147, 0.3); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .result-section {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .result-card {
+            background: white;
+            border: 2px solid var(--success);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .result-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .extracted-text {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .analysis-content {
+            line-height: 1.8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .file-info {
+            background: #e8f5e9;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border: 2px solid #ef5350;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 2px solid #66bb6a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-balance-scale"></i> Vidhi Saarathi AI</h1>
+            <p>Upload FIR or Legal Document for AI Analysis</p>
+        </div>
+
+        <div class="upload-card">
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <h3>Drag & Drop PDF File Here</h3>
+                <p>or click to browse</p>
+                <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
+                    Supported: PDF files up to 20MB
+                </p>
+                <input type="file" id="fileInput" class="file-input" accept=".pdf,application/pdf">
+            </div>
+
+            <div class="file-info" id="fileInfo">
+                <strong>Selected:</strong> <span id="fileName"></span> 
+                (<span id="fileSize"></span>)
+            </div>
+
+            <button class="btn" id="uploadBtn" disabled>
+                <i class="fas fa-upload"></i> Upload & Analyze Document
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p><strong>Processing your document...</strong></p>
+                <p style="font-size: 0.9rem; color: #666;">
+                    Extracting text and analyzing with AI (15-45 seconds)
+                </p>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <div class="result-card">
+                    <h3><i class="fas fa-file-alt"></i> File Uploaded</h3>
+                    <p><strong>Filename:</strong> <span id="resultFilename"></span></p>
+                    <p><strong>Size:</strong> <span id="resultSize"></span></p>
+                    <p><strong>URL:</strong> <a href="#" id="resultUrl" target="_blank">Download File</a></p>
+                </div>
+
+                <div class="result-card" id="extractedSection" style="display: none;">
+                    <h3><i class="fas fa-align-left"></i> Extracted Text</h3>
+                    <p><strong>Length:</strong> <span id="textLength"></span> characters</p>
+                    <div class="extracted-text" id="extractedText"></div>
+                </div>
+
+                <div class="result-card" id="analysisSection" style="display: none;">
+                    <h3><i class="fas fa-brain"></i> AI Legal Analysis</h3>
+                    <p style="margin-bottom: 1rem;">
+                        <strong>Model:</strong> <span id="analysisModel"></span> | 
+                        <strong>Time:</strong> <span id="analysisTime"></span>
+                    </p>
+                    <div class="analysis-content" id="analysisContent"></div>
+                </div>
+            </div>
+
+            <div id="alertContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3000' : '');
+        
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const loading = document.getElementById('loading');
+        const resultSection = document.getElementById('resultSection');
+        const alertContainer = document.getElementById('alertContainer');
+
+        let selectedFile = null;
+
+        // Click to browse
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Drag & drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (file.type !== 'application/pdf') {
+                showAlert('Please select a PDF file', 'error');
+                return;
+            }
+
+            if (file.size > 20 * 1024 * 1024) {
+                showAlert('File too large. Maximum size is 20MB', 'error');
+                return;
+            }
+
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+            fileInfo.style.display = 'block';
+            uploadBtn.disabled = false;
+        }
+
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            // Check for auth token
+            const authData = JSON.parse(localStorage.getItem('userAuth') || '{}');
+            const token = authData.token;
+
+            if (!token) {
+                showAlert('Please login first to upload documents', 'error');
+                setTimeout(() => {
+                    window.location.href = 'auth.html';
+                }, 2000);
+                return;
+            }
+
+            // Show loading
+            uploadBtn.disabled = true;
+            loading.style.display = 'block';
+            resultSection.style.display = 'none';
+            alertContainer.innerHTML = '';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                const response = await fetch(`${API_BASE}/api/upload-fir`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                loading.style.display = 'none';
+
+                if (data.success) {
+                    showAlert('Document uploaded and analyzed successfully!', 'success');
+                    displayResults(data);
+                } else {
+                    showAlert('Upload failed: ' + (data.error || 'Unknown error'), 'error');
+                    uploadBtn.disabled = false;
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                showAlert('Network error: ' + error.message, 'error');
+                uploadBtn.disabled = false;
+            }
+        });
+
+        function displayResults(data) {
+            resultSection.style.display = 'block';
+
+            // File info
+            document.getElementById('resultFilename').textContent = data.file.filename;
+            document.getElementById('resultSize').textContent = (data.file.size / 1024).toFixed(2) + ' KB';
+            document.getElementById('resultUrl').href = data.signedUrl || data.file.url;
+
+            // Extracted text
+            if (data.extractedText) {
+                document.getElementById('extractedSection').style.display = 'block';
+                document.getElementById('textLength').textContent = data.extractedText.length;
+                document.getElementById('extractedText').textContent = data.extractedText.preview;
+            }
+
+            // AI analysis
+            if (data.analysis) {
+                document.getElementById('analysisSection').style.display = 'block';
+                document.getElementById('analysisModel').textContent = data.analysis.model;
+                document.getElementById('analysisTime').textContent = new Date(data.analysis.timestamp).toLocaleString();
+                document.getElementById('analysisContent').innerHTML = data.analysis.text;
+            }
+
+            // Reset for next upload
+            selectedFile = null;
+            fileInput.value = '';
+            fileInfo.style.display = 'none';
+            uploadBtn.disabled = true;
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i> ${message}`;
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+        }
+    </script>
+</body>
+</html>

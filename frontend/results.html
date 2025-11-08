@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Analysis Results - Vidhi Saarathi AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .version-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .query-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 1.1em;
+        }
+
+        .character-counter {
+            text-align: right;
+            font-size: 0.9em;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        .character-counter.warning {
+            color: #f59e0b;
+        }
+
+        .character-counter.error {
+            color: #ef4444;
+        }
+
+        #user-query {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        #user-query:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        #analyze-btn {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        #analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        #analyze-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .tips-section {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .tips-section h4 {
+            color: #0369a1;
+            margin-bottom: 10px;
+        }
+
+        .tips-section ul {
+            margin-left: 20px;
+            color: #0c4a6e;
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            color: #3b82f6;
+            font-size: 1.2em;
+        }
+
+        .loading-steps {
+            margin-top: 15px;
+            font-size: 0.95em;
+            color: #6b7280;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e5e7eb;
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .analysis-success {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .analysis-header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 20px;
+        }
+
+        .analysis-header h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.5em;
+        }
+
+        .analysis-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .performance-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+
+        .performance-badge.fast {
+            background: rgba(34, 197, 94, 0.8);
+        }
+
+        .performance-badge.medium {
+            background: rgba(245, 158, 11, 0.8);
+        }
+
+        .performance-badge.slow {
+            background: rgba(239, 68, 68, 0.8);
+        }
+
+        .analysis-content {
+            padding: 25px;
+        }
+
+        .legal-analysis .domain-section,
+        .legal-analysis .priority-section,
+        .legal-analysis .explanation-section,
+        .legal-analysis .actions-section,
+        .legal-analysis .laws-section,
+        .legal-analysis .disclaimer-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .legal-analysis h3 {
+            color: #1e40af;
+            margin: 0 0 15px 0;
+            font-size: 1.2em;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 1px solid #fecaca;
+            border-left: 4px solid #ef4444;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .error-message h3 {
+            color: #dc2626;
+            margin: 0 0 15px 0;
+        }
+
+        .system-info {
+            background: #f8fafc;
+            padding: 15px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9em;
+        }
+
+        .retry-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        /* Lawyer Recommendation Styles */
+        .lawyer-recommendations-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .lawyer-recommendations-section h3 {
+            color: #1e40af;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+
+        .lawyers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .lawyer-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .lawyer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .lawyer-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .lawyer-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .lawyer-info h4 {
+            margin: 0 0 5px 0;
+            color: #1e293b;
+            font-size: 1.1em;
+        }
+
+        .lawyer-specialization {
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+
+        .lawyer-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 0.85em;
+            color: #64748b;
+            flex-wrap: wrap;
+        }
+
+        .verified-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #10b981;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .lawyer-details {
+            margin: 15px 0;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .lawyer-details p {
+            margin: 8px 0;
+            font-size: 0.9em;
+            color: #475569;
+        }
+
+        .lawyer-details strong {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .lawyer-description {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            font-size: 0.85em;
+            line-height: 1.5;
+            color: #475569;
+        }
+
+        .lawyer-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .availability {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .availability.available {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .availability.limited {
+            background: #fef3c7;
+            color: #854d0e;
+        }
+
+        .consultation-fee {
+            font-weight: bold;
+            color: #1e40af;
+            font-size: 0.9em;
+        }
+
+        .lawyer-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .contact-btn {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .view-all-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: white;
+            color: #3b82f6;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            border: 2px solid #3b82f6;
+            transition: all 0.3s ease;
+        }
+
+        .view-all-btn:hover {
+            background: #3b82f6;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .domain-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .analysis-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ Vidhi Saarathi AI</h1>
+            <p>Enhanced Legal Analysis Platform for Indian Law</p>
+            <div class="version-badge">v4.1 - Enhanced Performance</div>
+        </div>
+        
+        <div class="content">
+            <div class="query-section">
+                <label for="user-query">Enter your legal query or describe your legal issue:</label>
+                <textarea id="user-query" placeholder="Example: 'My landlord is not returning my security deposit after 6 months' or 'What are the legal implications of Section 420 IPC?'" maxlength="2000"></textarea>
+                <div class="character-counter" id="char-counter">0/2000 characters</div>
+                <div style="display:flex; gap:12px; align-items:center; margin-top:12px;">
+                    <button id="upload-doc-btn" type="button" style="background:#f3f4f6; color:#1f2937; border:2px dashed #9ca3af; padding:10px 18px; border-radius:10px; cursor:pointer; font-weight:600;">
+                        <i class="fas fa-file-upload"></i> Upload Document
+                    </button>
+                    <input type="file" id="results-file-input" class="file-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple style="display:none;">
+                    <button id="analyze-btn">🔍 Analyze Legal Issue</button>
+                </div>
+                <div id="selected-files" style="margin-top:10px;"></div>
+                
+                <div class="tips-section">
+                    <h4>💡 Tips for Better Results:</h4>
+                    <ul>
+                        <li>Keep queries under 2000 characters for optimal performance</li>
+                        <li>Be specific about your situation and location in India</li>
+                        <li>Mention relevant dates, amounts, or parties involved</li>
+                        <li>Use Ctrl+Enter as a shortcut to analyze</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="loading">
+                <div class="spinner"></div>
+                Analyzing your legal query with enhanced AI...
+                <div class="loading-steps" id="loading-steps">
+                    <div>🤖 Selecting optimal AI model...</div>
+                </div>
+            </div>
+            
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // ✅ Enhanced API Configuration
+        // Auto-detect API base: use localhost for local dev, or override with window.API_BASE_URL for production
+        const API_BASE_URL = window.API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : '');
+
+        // Character counter functionality
+        const queryInput = document.getElementById('user-query');
+        const charCounter = document.getElementById('char-counter');
+        const analyzeBtn = document.getElementById('analyze-btn');
+
+        if (queryInput && charCounter) {
+            queryInput.addEventListener('input', function() {
+                const length = this.value.length;
+                charCounter.textContent = `${length}/2000 characters`;
+                
+                // Update styling based on length
+                charCounter.className = 'character-counter';
+                if (length > 1800) {
+                    charCounter.classList.add('error');
+                } else if (length > 1500) {
+                    charCounter.classList.add('warning');
+                }
+                
+                // Disable button if too long
+                if (analyzeBtn) {
+                    analyzeBtn.disabled = length > 2000;
+                }
+            });
+        }
+
+        // Loading steps simulation
+        let loadingStepIndex = 0;
+        const loadingSteps = [
+            '🤖 Selecting optimal AI model...',
+            '🔑 Authenticating with secure API keys...',
+            '⚖️ Processing legal analysis...',
+            '📖 Referencing Indian law databases...',
+            '🎯 Generating priority assessment...',
+            '📋 Preparing actionable recommendations...'
+        ];
+
+        let loadingInterval;
+
+        function startLoadingSteps() {
+            const loadingStepsDiv = document.getElementById('loading-steps');
+            if (!loadingStepsDiv) return;
+            
+            loadingStepIndex = 0;
+            loadingInterval = setInterval(() => {
+                if (loadingStepIndex < loadingSteps.length - 1) {
+                    loadingStepIndex++;
+                    loadingStepsDiv.innerHTML = `<div>${loadingSteps[loadingStepIndex]}</div>`;
+                }
+            }, 2000);
+        }
+
+        function stopLoadingSteps() {
+            if (loadingInterval) {
+                clearInterval(loadingInterval);
+            }
+        }
+
+        // ✅ Enhanced Result Display Function
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (data && data.success) {
+                // Determine performance badge
+                const processingTime = data.metadata?.processingTime || 0;
+                let performanceClass = 'fast';
+                let performanceText = 'Fast';
+                
+                if (processingTime > 30000) {
+                    performanceClass = 'slow';
+                    performanceText = 'Detailed';
+                } else if (processingTime > 15000) {
+                    performanceClass = 'medium';
+                    performanceText = 'Thorough';
+                }
+
+                resultsDiv.innerHTML = `
+                    <div class="analysis-success">
+                        <div class="analysis-header">
+                            <h2>✅ Enhanced Legal Analysis Complete</h2>
+                            <div class="analysis-meta">
+                                <span><strong>AI Model:</strong> ${data.metadata?.model || 'Advanced AI'}</span>
+                                <span><strong>Processing:</strong> ${processingTime}ms</span>
+                                <span><strong>API Key:</strong> ${data.metadata?.keyUsed || 'Primary'}</span>
+                                ${data.metadata?.retryCount > 0 ? `<span><strong>Retries:</strong> ${data.metadata.retryCount}</span>` : ''}
+                                <span class="performance-badge ${performanceClass}">${performanceText} Response</span>
+                            </div>
+                        </div>
+                        <div class="analysis-content">
+                            ${data.analysis}
+                        </div>
+                        <div id="lawyer-recommendations"></div>
+                        <div class="system-info">
+                            ✨ Enhanced with ${data.systemInfo?.totalModels || 3} AI models, ${data.systemInfo?.totalKeys || 3} API keys, intelligent timeout handling, and automatic retry logic
+                        </div>
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+                
+                // Extract legal domain from the analysis and fetch matching lawyers
+                extractDomainAndFetchLawyers(data.analysis);
+                
+                // Scroll to results
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                throw new Error(data?.error || 'No analysis data received');
+            }
+        }
+
+        // ✅ Extract Legal Domain and Fetch Matching Lawyers
+        async function extractDomainAndFetchLawyers(analysisHTML) {
+            try {
+                // Extract domain from the analysis HTML
+                const domainMatch = analysisHTML.match(/<span class="domain-badge">([^<]+)<\/span>/i) ||
+                                   analysisHTML.match(/Primary Domain:<\/strong>\s*([^<]+)/i) ||
+                                   analysisHTML.match(/Legal Domain:<\/strong>\s*([^<]+)/i);
+                
+                let domain = 'Criminal Law'; // Default to Criminal Law
+                
+                if (domainMatch && domainMatch[1]) {
+                    domain = domainMatch[1].trim();
+                    console.log('🏛️ Detected legal domain:', domain);
+                } else {
+                    // Try to detect from query content
+                    const query = document.getElementById('user-query').value.toLowerCase();
+                    if (query.includes('divorce') || query.includes('custody') || query.includes('marriage')) {
+                        domain = 'Family Law';
+                    } else if (query.includes('property') || query.includes('land') || query.includes('real estate')) {
+                        domain = 'Property Law';
+                    } else if (query.includes('company') || query.includes('business') || query.includes('corporate')) {
+                        domain = 'Corporate Law';
+                    } else if (query.includes('cyber') || query.includes('online') || query.includes('internet')) {
+                        domain = 'Cyber Law';
+                    } else if (query.includes('civil') || query.includes('contract') || query.includes('dispute')) {
+                        domain = 'Civil Law';
+                    }
+                    console.log('🔍 Detected domain from query:', domain);
+                }
+                
+                // Fetch lawyers based on detected domain
+                await fetchAndDisplayLawyers(domain);
+                
+            } catch (error) {
+                console.error('Error extracting domain:', error);
+                // Fetch criminal lawyers by default
+                await fetchAndDisplayLawyers('Criminal Law');
+            }
+        }
+
+        // ✅ Fetch and Display Lawyers by Specialization
+        async function fetchAndDisplayLawyers(specialization) {
+            const lawyerSection = document.getElementById('lawyer-recommendations');
+            
+            if (!lawyerSection) return;
+            
+            try {
+                console.log('👨‍⚖️ Fetching lawyers for:', specialization);
+                
+                // Show loading state
+                lawyerSection.innerHTML = `
+                    <div style="padding: 20px; text-align: center;">
+                        <p>🔍 Finding expert lawyers in ${specialization}...</p>
+                    </div>
+                `;
+                
+                const response = await fetch(`${API_BASE_URL}/api/lawyers/specialization/${encodeURIComponent(specialization)}`);
+                const data = await response.json();
+                
+                if (data.success && data.lawyers && data.lawyers.length > 0) {
+                    displayLawyerCards(data.lawyers, specialization);
+                } else {
+                    // No lawyers found, show message
+                    lawyerSection.innerHTML = `
+                        <div style="padding: 20px; background: #f3f4f6; border-radius: 10px; margin-top: 20px;">
+                            <p style="color: #6b7280;">No lawyers found for ${specialization} at the moment.</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error fetching lawyers:', error);
+                lawyerSection.innerHTML = '';
+            }
+        }
+
+        // ✅ Display Lawyer Cards
+        function displayLawyerCards(lawyers, specialization) {
+            const lawyerSection = document.getElementById('lawyer-recommendations');
+            
+            const lawyersHTML = lawyers.slice(0, 3).map(lawyer => `
+                <div class="lawyer-card">
+                    <div class="lawyer-header">
+                        <div class="lawyer-avatar">${lawyer.name.split(' ').map(n => n[0]).join('').substring(0, 2)}</div>
+                        <div class="lawyer-info">
+                            <h4>${lawyer.name}</h4>
+                            <p class="lawyer-specialization">${lawyer.specialization}</p>
+                            <div class="lawyer-stats">
+                                <span>⭐ ${lawyer.rating}/5.0</span>
+                                <span>📁 ${lawyer.casesHandled} cases</span>
+                                <span>📅 ${lawyer.experience}</span>
+                            </div>
+                        </div>
+                        ${lawyer.verified ? '<span class="verified-badge">✓ Verified</span>' : ''}
+                    </div>
+                    <div class="lawyer-details">
+                        <p><strong>Bar Number:</strong> ${lawyer.barNumber}</p>
+                        <p><strong>State:</strong> ${lawyer.state}</p>
+                        <p><strong>Languages:</strong> ${lawyer.languages.join(', ')}</p>
+                        <p><strong>Expertise:</strong> ${lawyer.expertise.join(', ')}</p>
+                        <p class="lawyer-description">${lawyer.description}</p>
+                        <div class="lawyer-footer">
+                            <span class="availability ${lawyer.availability === 'Available' ? 'available' : 'limited'}">${lawyer.availability}</span>
+                            <span class="consultation-fee">${lawyer.consultationFee}</span>
+                        </div>
+                    </div>
+                    <div class="lawyer-actions">
+                        <a href="mailto:${lawyer.contactEmail}" class="contact-btn">📧 Email</a>
+                        <a href="tel:${lawyer.contactPhone}" class="contact-btn">📞 Call</a>
+                    </div>
+                </div>
+            `).join('');
+            
+            lawyerSection.innerHTML = `
+                <div class="lawyer-recommendations-section">
+                    <h3>👨‍⚖️ Connect with Expert Lawyers in ${specialization}</h3>
+                    <p style="color: #6b7280; margin-bottom: 20px;">Based on your query, we recommend these verified legal experts:</p>
+                    <div class="lawyers-grid">
+                        ${lawyersHTML}
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="dashboard.html" class="view-all-btn">View All Lawyers →</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ✅ Enhanced Legal Analysis Function
+        async function analyzeQuery() {
+            const queryInput = document.getElementById('user-query');
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.getElementById('loading');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            
+            if (!queryInput || !queryInput.value.trim()) {
+                alert('⚖️ Please enter your legal query before analyzing.');
+                return;
+            }
+            
+            const query = queryInput.value.trim();
+            
+            if (query.length < 10) {
+                alert('⚖️ Please provide a more detailed legal query (at least 10 characters).');
+                return;
+            }
+
+            if (query.length > 2000) {
+                alert('⚖️ Query too long! Please limit to 2000 characters for optimal performance.');
+                return;
+            }
+            
+            try {
+                // Show enhanced loading state
+                loadingDiv.style.display = 'block';
+                resultsDiv.style.display = 'none';
+                analyzeBtn.disabled = true;
+                analyzeBtn.innerHTML = '🔄 Analyzing with Enhanced AI...';
+                
+                // Start loading steps animation
+                startLoadingSteps();
+                
+                console.log('🔍 Calling enhanced backend API:', `${API_BASE_URL}/api/analyze`);
+                console.log('📏 Query length:', query.length);
+                
+                const startTime = Date.now();
+                
+                // Call enhanced backend API
+                const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const clientRequestTime = Date.now() - startTime;
+                console.log('📡 Response status:', response.status);
+                console.log('⏱️ Client request time:', clientRequestTime + 'ms');
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ Response data received');
+                console.log('🤖 AI Model used:', data.metadata?.model);
+                console.log('🔑 API Key used:', data.metadata?.keyUsed);
+                console.log('🔄 Total attempts:', data.metadata?.totalAttempts);
+                
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    throw new Error(data.error || 'Analysis failed');
+                }
+                
+            } catch (error) {
+                console.error('❌ API Call failed:', error);
+                
+                // Enhanced error display with technical details
+                resultsDiv.innerHTML = `
+                    <div class="error-message">
+                        <h3>⚠️ Analysis Error</h3>
+                        <p><strong>We encountered an issue while analyzing your legal query:</strong></p>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        
+                        <div style="margin-top: 20px;">
+                            <h4>💡 Enhanced Troubleshooting Tips:</h4>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li><strong>Query Length:</strong> Try shortening your query (current: ${query.length}/2000 characters)</li>
+                                <li><strong>Server Status:</strong> Check if backend is running with enhanced timeout</li>
+                                <li><strong>Network:</strong> Verify stable internet connection</li>
+                                <li><strong>API Keys:</strong> Ensure Google API keys have no IP restrictions</li>
+                                <li><strong>Rate Limits:</strong> You may have hit API quotas - try again in 2-3 minutes</li>
+                                <li><strong>Complex Queries:</strong> Very detailed legal questions may take longer</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="margin-top: 15px; padding: 10px; background: #f3f4f6; border-radius: 6px;">
+                            <small><strong>Technical Info:</strong> Enhanced backend v4.1 with intelligent retry and 3-minute timeout</small>
+                        </div>
+                        
+                        <button class="retry-btn" onclick="analyzeQuery()">🔄 Try Again with Enhanced System</button>
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+                
+            } finally {
+                // Reset loading state
+                stopLoadingSteps();
+                loadingDiv.style.display = 'none';
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '🔍 Analyze Legal Issue';
+            }
+        }
+
+        // ✅ Enhanced Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏛️ Vidhi Saarathi AI Enhanced Frontend Loaded (v4.1)');
+            
+            // Connect analyze button
+            const analyzeBtn = document.getElementById('analyze-btn');
+            if (analyzeBtn) {
+                analyzeBtn.addEventListener('click', analyzeQuery);
+                console.log('✅ Enhanced analyze button connected');
+            }
+            
+            // Enable Ctrl+Enter to analyze
+            const queryInput = document.getElementById('user-query');
+            if (queryInput) {
+                queryInput.addEventListener('keydown', function(e) {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        analyzeQuery();
+                    }
+                });
+                console.log('✅ Enhanced query input connected (Ctrl+Enter to analyze)');
+            }
+            
+            // Enhanced backend connection test
+            fetch(`${API_BASE_URL}/health`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log('🏥 Enhanced backend health check:', data);
+                    console.log(`✅ Connected to enhanced backend v${data.version || '4.1'}`);
+                    console.log(`🤖 Features: ${Object.keys(data.features || {}).join(', ')}`);
+                    
+                    // Show connection status to user
+                    const connectionStatus = document.createElement('div');
+                    connectionStatus.style.cssText = `
+                        position: fixed; 
+                        bottom: 20px; 
+                        right: 20px; 
+                        background: #10b981; 
+                        color: white; 
+                        padding: 8px 16px; 
+                        border-radius: 20px; 
+                        font-size: 0.85em;
+                        z-index: 1000;
+                        opacity: 0.9;
+                    `;
+                    connectionStatus.innerHTML = `✅ Enhanced Backend v${data.version || '4.1'} Connected`;
+                    document.body.appendChild(connectionStatus);
+                    
+                    // Auto-hide after 3 seconds
+                    setTimeout(() => {
+                        if (connectionStatus.parentNode) {
+                            connectionStatus.remove();
+                        }
+                    }, 3000);
+                })
+                .catch(err => {
+                    console.warn('⚠️ Enhanced backend health check failed:', err.message);
+                    
+                    // Show connection warning
+                    const connectionWarning = document.createElement('div');
+                    connectionWarning.style.cssText = `
+                        position: fixed; 
+                        bottom: 20px; 
+                        right: 20px; 
+                        background: #f59e0b; 
+                        color: white; 
+                        padding: 8px 16px; 
+                        border-radius: 20px; 
+                        font-size: 0.85em;
+                        z-index: 1000;
+                    `;
+                    connectionWarning.innerHTML = `⚠️ Backend Connection Issue`;
+                    document.body.appendChild(connectionWarning);
+                });
+                
+            // Check quota status
+            fetch(`${API_BASE_URL}/api/quota`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log('📊 API Quota Status:', data.summary);
+                })
+                .catch(err => {
+                    console.warn('⚠️ Quota check failed:', err.message);
+                });
+            
+            // Upload document functionality (UI only)
+            const uploadBtn = document.getElementById('upload-doc-btn');
+            const fileInput = document.getElementById('results-file-input');
+            const selectedFilesDiv = document.getElementById('selected-files');
+
+            if (uploadBtn && fileInput) {
+                uploadBtn.addEventListener('click', () => fileInput.click());
+
+                fileInput.addEventListener('change', (e) => {
+                    const files = Array.from(e.target.files || []);
+                    // Display selected files
+                    selectedFilesDiv.innerHTML = '';
+                    if (files.length === 0) return;
+
+                    const list = document.createElement('div');
+                    list.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+
+                    const metadata = files.map(f => ({ name: f.name, size: f.size, type: f.type, lastModified: f.lastModified }));
+
+                    files.forEach(f => {
+                        const row = document.createElement('div');
+                        row.style.cssText = 'padding:8px; background:#f8fafc; border:1px solid #e6eef8; border-radius:8px; display:flex; justify-content:space-between; align-items:center;';
+                        row.innerHTML = `<span style="font-weight:600;"><i class="fas fa-file-alt"></i> ${f.name}</span><button type="button" style="background:#ef4444;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">Remove</button>`;
+                        const removeBtn = row.querySelector('button');
+                        removeBtn.addEventListener('click', () => {
+                            row.remove();
+                            // Remove from file input: rebuild DataTransfer from current fileInput.files excluding this file
+                            const currentFiles = Array.from(fileInput.files || []);
+                            const dt = new DataTransfer();
+                            currentFiles.filter(ff => !(ff.name === f.name && ff.size === f.size && ff.lastModified === f.lastModified)).forEach(x => dt.items.add(x));
+                            fileInput.files = dt.files;
+                            // Update stored metadata from the updated fileInput
+                            const updated = Array.from(fileInput.files).map(ff => ({ name: ff.name, size: ff.size, type: ff.type, lastModified: ff.lastModified }));
+                            localStorage.setItem('resultsFiles', JSON.stringify(updated));
+                            // If no files remain, clear the selectedFilesDiv
+                            if (fileInput.files.length === 0) {
+                                selectedFilesDiv.innerHTML = '';
+                            }
+                        });
+                        list.appendChild(row);
+                    });
+
+                    selectedFilesDiv.appendChild(list);
+
+                    // Store metadata to localStorage for later backend upload
+                    localStorage.setItem('resultsFiles', JSON.stringify(metadata));
+                });
+            }
+        });
+    </script>
+</body>
+</html>

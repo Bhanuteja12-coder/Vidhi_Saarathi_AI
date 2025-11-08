@@ -1,0 +1,244 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║               🚀 DEPLOYMENT QUICK COMMANDS                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    📤 STEP 1: PUSH TO GITHUB                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Open PowerShell in project folder:
+
+# Initialize git (if not done)
+git init
+
+# Add all files
+git add .
+
+# Commit
+git commit -m "Initial commit: Vidhi Saarathi AI"
+
+# Connect to GitHub (use YOUR username)
+git remote add origin https://github.com/Akash-N-24/Vidhi_Saarathi_AI.git
+
+# Push
+git push -u origin main
+
+✅ DONE: Code now on GitHub!
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                 🔧 STEP 2: DEPLOY BACKEND ON RENDER                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+1. Go to: https://render.com
+2. Sign up with GitHub
+3. Click "New +" → "Web Service"
+4. Select your repository
+5. Configure:
+
+   Name:           vidhi-saarathi-backend
+   Root Directory: backend
+   Build Command:  npm install
+   Start Command:  npm start
+   
+6. Add Environment Variables:
+
+   SUPABASE_URL=https://clrhynfxwrirfbxhzikg.supabase.co
+   SUPABASE_SERVICE_KEY=your_key_here
+   GEMINI_API_KEY_1=your_key_here
+   GEMINI_API_KEY_2=your_key_here
+   GEMINI_API_KEY_3=your_key_here
+   AUTH_SECRET=VidhiSaarathi_AI_2025_Enhanced_SecureKey
+   SUPABASE_FIR_BUCKET=fir-uploads
+   PORT=3000
+
+7. Click "Create Web Service"
+8. Wait 2-5 minutes for deployment
+
+✅ DONE: Backend URL will be like:
+   https://vidhi-saarathi-backend.onrender.com
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                🌐 STEP 3: UPDATE FRONTEND FOR PRODUCTION                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Update API_BASE_URL in ALL frontend files:
+- frontend/index.html
+- frontend/results.html
+- frontend/auth.html
+- frontend/dashboard.html
+- frontend/upload.html
+
+FIND:
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000' 
+    : '';
+
+REPLACE WITH:
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000' 
+    : 'https://vidhi-saarathi-backend.onrender.com';
+
+Save all files, then:
+
+git add .
+git commit -m "Update API URLs for production"
+git push origin main
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│               🌐 STEP 4: DEPLOY FRONTEND ON VERCEL                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+1. Go to: https://vercel.com
+2. Sign up with GitHub
+3. Click "Add New..." → "Project"
+4. Import your repository
+5. Configure:
+
+   Project Name:    vidhi-saarathi-ai
+   Framework:       Other
+   Root Directory:  ./
+   Output Directory: frontend
+   
+6. Click "Deploy"
+7. Wait 1-2 minutes
+
+✅ DONE: Frontend URL will be like:
+   https://vidhi-saarathi-ai.vercel.app
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    ⚙️ STEP 5: UPDATE CORS (IMPORTANT!)                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Edit backend/server.js:
+
+app.use(cors({
+    origin: [
+        'http://localhost:3000',
+        'https://vidhi-saarathi-ai.vercel.app',  // Your Vercel URL
+        'https://vidhi-saarathi-ai-*.vercel.app' // Preview URLs
+    ],
+    credentials: true
+}));
+
+Save and push:
+
+git add backend/server.js
+git commit -m "Update CORS for production"
+git push origin main
+
+Render will auto-redeploy!
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        ✅ STEP 6: TEST DEPLOYMENT                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Test Backend:
+  https://vidhi-saarathi-backend.onrender.com/health
+
+Test Frontend:
+  https://vidhi-saarathi-ai.vercel.app
+
+Test Full Flow:
+  1. Open Vercel URL
+  2. Go to results page
+  3. Enter query: "Someone stole my phone"
+  4. Click Analyze
+  5. Should see analysis + lawyer recommendations
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🔑 IMPORTANT NOTES                                        ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+⚠️  NEVER commit .env file to GitHub!
+⚠️  Add all API keys in Render dashboard (not in code)
+⚠️  Update ALL frontend files with production backend URL
+⚠️  Free Render tier sleeps after 15 min (first request takes 30-60s)
+⚠️  Update CORS settings to include your Vercel domain
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    📋 CHECKLIST                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Before deployment:
+  [ ] Create .gitignore
+  [ ] Remove .env from git
+  [ ] Update frontend API URLs
+  [ ] Commit all changes
+
+GitHub:
+  [ ] Repository created
+  [ ] Code pushed
+  [ ] .env not visible
+
+Render (Backend):
+  [ ] Service created
+  [ ] Environment variables set
+  [ ] Deployment successful
+  [ ] /health endpoint working
+
+Vercel (Frontend):
+  [ ] Project deployed
+  [ ] Homepage loads
+  [ ] All pages accessible
+
+Post-deployment:
+  [ ] CORS updated
+  [ ] End-to-end test passed
+  [ ] Lawyer recommendations working
+  [ ] Authentication working
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  🔄 FUTURE UPDATES                                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+To deploy updates:
+
+1. Make changes locally
+2. Test locally (npm start)
+3. Commit:
+   git add .
+   git commit -m "Description"
+   git push origin main
+
+4. Auto-deploys:
+   ✅ Render (backend) - auto deploys in 2-3 min
+   ✅ Vercel (frontend) - auto deploys in 1-2 min
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🆘 TROUBLESHOOTING                                        ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Problem: "Backend not responding"
+  → Wait 30-60s (Render free tier wakes up)
+  → Check Render logs for errors
+  → Verify environment variables
+
+Problem: "CORS error"
+  → Update backend CORS with Vercel URL
+  → Check browser console for exact error
+  → Verify no trailing slashes in URLs
+
+Problem: "API calls fail"
+  → Check frontend uses correct backend URL
+  → Clear browser cache (Ctrl+Shift+R)
+  → Check Network tab in DevTools
+
+Problem: "Database connection failed"
+  → Verify Supabase keys in Render
+  → Check Supabase dashboard status
+  → Verify service key (not anon key)
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🎉 SUCCESS!                                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Your URLs:
+
+Backend:  https://vidhi-saarathi-backend.onrender.com
+Frontend: https://vidhi-saarathi-ai.vercel.app
+
+Share your app with the world! 🌍
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                    Need help? Check DEPLOYMENT_GUIDE.md
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

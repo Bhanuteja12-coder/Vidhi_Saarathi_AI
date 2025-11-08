@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lawyer Dashboard | Vidhi Saarathi AI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: #F9F9F6;
+            --bg-dark: #121212;
+            --primary-accent: #1F3A93;
+            --secondary-accent: #D4AF37;
+            --text-light: #2C3E50;
+            --text-dark: #E0E0E0;
+            --success-color: #27AE60;
+            --danger-color: #E74C3C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+            color: var(--text-light);
+            transition: all 0.4s ease;
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-accent) 0%, #2C4AA0 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 15px rgba(31, 58, 147, 0.2);
+            position: relative;
+            z-index: 10000;
+        }
+
+        body.dark-mode .navbar {
+            background: linear-gradient(135deg, #0F1A2E 0%, #1A2B4A 100%);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.6rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: var(--secondary-accent);
+            font-size: 1.8rem;
+        }
+
+        .nav-section {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(212, 175, 55, 0.2);
+            border-color: var(--secondary-accent);
+            color: var(--secondary-accent);
+        }
+
+        .nav-links a.active {
+            background-color: var(--secondary-accent);
+            color: var(--primary-accent);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secondary-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-accent);
+        }
+
+        .logout-btn {
+            background: rgba(231, 76, 60, 0.2);
+            color: #E74C3C;
+            border: 2px solid #E74C3C;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .logout-btn:hover {
+            background-color: #E74C3C;
+            color: white;
+        }
+
+        .theme-toggle {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--secondary-accent);
+            border: 2px solid var(--secondary-accent);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-accent);
+            color: var(--primary-accent);
+        }
+
+        /* LOGIN/SIGNUP GATE OVERLAY */
+        .auth-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(31, 58, 147, 0.95);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        body.dark-mode .auth-gate {
+            background: rgba(18, 18, 18, 0.95);
+        }
+
+        .auth-card {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        body.dark-mode .auth-card {
+            background: rgba(31, 58, 147, 0.1);
+            border: 2px solid var(--secondary-accent);
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #D4AF37 0%, #1F3A93 50%, #D4AF37 100%);
+        }
+
+        .auth-title {
+            color: var(--primary-accent);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        body.dark-mode .auth-title {
+            color: var(--secondary-accent);
+        }
+
+        .auth-subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        body.dark-mode .auth-subtitle {
+            color: var(--text-dark);
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: #F8F9FA;
+            border-radius: 10px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        body.dark-mode .auth-tabs {
+            background: rgba(18, 18, 18, 0.3);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #6B7280;
+        }
+
+        .auth-tab.active {
+            background: var(--primary-accent);
+            color: white;
+        }
+
+        body.dark-mode .auth-tab.active {
+            background: var(--secondary-accent);
+            color: var(--bg-dark);
+        }
+
+        .auth-form {
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-accent);
+        }
+
+        body.dark-mode .form-label {
+            color: var(--secondary-accent);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #BDC3C7;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Georgia', serif;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--secondary-accent);
+        }
+
+        body.dark-mode .form-input {
+            background: rgba(18, 18, 18, 0.8);
+            border-color: var(--secondary-accent);
+            color: var(--text-dark);
+        }
+
+        /* PASSWORD GROUP WITH TOGGLE */
+        .password-group {
+            position: relative;
+        }
+
+        .password-group .form-input {
+            padding-right: 3rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6B7280;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+            user-select: none;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-accent);
+        }
+
+        body.dark-mode .password-toggle:hover {
+            color: var(--secondary-accent);
+        }
+
+        .otp-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 1.5rem 0;
+        }
+
+        .otp-input {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--secondary-accent);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-accent);
+        }
+
+        body.dark-mode .otp-input {
+            background: rgba(18, 18, 18, 0.8);
+            color: var(--secondary-accent);
+        }
+
+        .auth-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-accent) 0%, #2C4AA0 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+            margin-bottom: 1rem;
+        }
+
+        body.dark-mode .auth-btn {
+            background: linear-gradient(135deg, var(--secondary-accent) 0%, #E6C547 100%);
+            color: var(--bg-dark);
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(31, 58, 147, 0.4);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* DASHBOARD CONTENT */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: none;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title {
+            color: var(--primary-accent);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        body.dark-mode .dashboard-title {
+            color: var(--secondary-accent);
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--secondary-accent);
+        }
+
+        body.dark-mode .welcome-card {
+            background: rgba(31, 58, 147, 0.1);
+            border-color: var(--secondary-accent);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        body.dark-mode .stat-card {
+            background: rgba(31, 58, 147, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-accent);
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        body.dark-mode .stat-number {
+            color: var(--secondary-accent);
+        }
+
+        .stat-label {
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+
+        /* COMING SOON CONTENT */
+        .coming-soon {
+            background: linear-gradient(135deg, var(--primary-accent) 0%, #2C4AA0 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .coming-soon h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .coming-soon p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .navbar-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .user-info {
+                gap: 0.5rem;
+            }
+
+            .dashboard-container {
+                padding: 0 1rem;
+            }
+
+            .dashboard-title {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .auth-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN/SIGNUP GATE OVERLAY -->
+    <div class="auth-gate" id="auth-gate">
+        <div class="auth-card">
+            <!-- AUTH TABS -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="login-tab" onclick="switchTab('login')">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <button class="auth-tab" id="signup-tab" onclick="switchTab('signup')">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </button>
+            </div>
+
+            <!-- LOGIN SECTION -->
+            <div id="login-section">
+                <div class="auth-title">
+                    <i class="fas fa-gavel"></i>
+                    Professional Login
+                </div>
+                <div class="auth-subtitle">
+                    Secure access for verified legal practitioners
+                </div>
+                <!-- SIMPLE PASSWORD LOGIN -->
+                <form class="auth-form" id="bar-login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="login-bar-number">Bar Council Registration Number or Email</label>
+                        <input type="text" id="login-bar-number" class="form-input" placeholder="DL/1234/2020 or email@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Password</label>
+                        <input type="password" id="login-password" class="form-input" placeholder="Enter password" required>
+                    </div>
+
+                    <button type="submit" class="auth-btn">
+                        <i class="fas fa-paper-plane"></i> Login
+                    </button>
+                </form>
+            </div>
+
+            <!-- SIGNUP SECTION -->
+            <div id="signup-section" style="display: none;">
+                <div class="auth-title">
+                    <i class="fas fa-user-plus"></i>
+                    Professional Registration
+                </div>
+                <div class="auth-subtitle">
+                    Create your verified lawyer account
+                </div>
+                
+                <!-- Helpful instruction -->
+                <div style="background: #EFF6FF; border-left: 4px solid #1F3A93; padding: 12px 15px; margin: 15px 0; border-radius: 4px;">
+                    <p style="margin: 0; color: #1F3A93; font-size: 0.9rem;">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>All fields are required.</strong> Please fill out the complete form including selecting your state, specialization, and experience level.
+                    </p>
+                </div>
+                
+                <!-- SIMPLE REGISTRATION FORM -->
+                <form class="auth-form" id="signup-form">
+                    <div class="form-group">
+                        <label class="form-label" for="signup-fullname">Full Name</label>
+                        <input type="text" id="signup-fullname" class="form-input" 
+                               placeholder="Adv. John Doe" required>
+                        <div class="error-message" id="fullname-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="signup-email">Email Address</label>
+                        <input type="email" id="signup-email" class="form-input" 
+                               placeholder="john.doe@example.com" required>
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="signup-mobile">Mobile Number</label>
+                        <input type="tel" id="signup-mobile" class="form-input" 
+                               placeholder="+91 XXXXX XXXXX" pattern="[0-9]{10}" required>
+                        <div class="error-message" id="mobile-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="signup-bar-number">Bar Council Registration Number</label>
+                        <input type="text" id="signup-bar-number" class="form-input" 
+                               placeholder="DL/1234/2020" required>
+                        <div class="error-message" id="bar-number-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="signup-state">State Bar Council</label>
+                        <select id="signup-state" class="form-input" required>
+                            <option value="">Select State</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="West Bengal">West Bengal</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                            <option value="Telangana">Telangana</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <div class="error-message" id="state-error"></div>
+                    </div>
+
+                    <!-- NEW: DOMAIN SPECIALIZATION -->
+                    <div class="form-group">
+                        <label class="form-label" for="signup-specialization">
+                            <i class="fas fa-balance-scale"></i> Domain Specialization
+                        </label>
+                        <select id="signup-specialization" class="form-input" required>
+                            <option value="">Select Specialization</option>
+                            <option value="Criminal Law">🚔 Criminal Law</option>
+                            <option value="Civil Law">⚖️ Civil Law</option>
+                            <option value="Family Law">👨‍👩‍👧‍👦 Family Law</option>
+                            <option value="Corporate Law">🏢 Corporate Law</option>
+                            <option value="Constitutional Law">📜 Constitutional Law</option>
+                            <option value="Tax Law">💰 Tax Law</option>
+                            <option value="Labor Law">👷 Labor & Employment Law</option>
+                            <option value="Property Law">🏠 Property & Real Estate Law</option>
+                            <option value="Intellectual Property">💡 Intellectual Property Law</option>
+                            <option value="Environmental Law">🌱 Environmental Law</option>
+                            <option value="Cyber Law">💻 Cyber & IT Law</option>
+                            <option value="Banking Law">🏦 Banking & Finance Law</option>
+                            <option value="Other">🔧 Other Specialization</option>
+                        </select>
+                        <div class="error-message" id="specialization-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="signup-experience">Years of Experience</label>
+                        <select id="signup-experience" class="form-input" required>
+                            <option value="">Select Experience</option>
+                            <option value="0-2">0-2 years (Junior)</option>
+                            <option value="3-5">3-5 years</option>
+                            <option value="6-10">6-10 years (Senior)</option>
+                            <option value="11-15">11-15 years (Expert)</option>
+                            <option value="16+">16+ years (Master)</option>
+                        </select>
+                        <div class="error-message" id="experience-error"></div>
+                    </div>
+
+                    <!-- NEW: PASSWORD WITH VISIBILITY TOGGLE -->
+                    <div class="form-group password-group">
+                        <label class="form-label" for="signup-password">Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="signup-password" class="form-input" 
+                                   placeholder="Minimum 8 characters" minlength="8" required>
+                            <i class="fas fa-eye password-toggle" id="toggle-signup-password"></i>
+                        </div>
+                        <div class="error-message" id="password-error"></div>
+                    </div>
+
+                    <div class="form-group password-group">
+                        <label class="form-label" for="signup-confirm-password">Confirm Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="signup-confirm-password" class="form-input" 
+                                   placeholder="Re-enter password" minlength="8" required>
+                            <i class="fas fa-eye password-toggle" id="toggle-signup-confirm-password"></i>
+                        </div>
+                        <div class="error-message" id="confirm-password-error"></div>
+                    </div>
+
+                    <button type="submit" class="auth-btn">
+                        <i class="fas fa-user-plus"></i> Create Professional Account
+                    </button>
+                    
+                    <div class="error-message" id="signup-general-error"></div>
+                    <div class="success-message" id="signup-success-message"></div>
+                </form>
+
+                <!-- OTP removed: simplified signup uses password and immediate account creation -->
+                <div style="text-align:center; color:#6B7280; margin-top:0.5rem; margin-bottom:1rem;">
+                    Mobile OTP verification has been simplified. Create an account using the form above.
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #E5E7EB;">
+                <p style="color: #6B7280; font-size: 0.9rem;">
+                    <strong>Citizens, please use</strong> 
+                    <a href="auth.html" style="color: var(--secondary-accent); font-weight: bold;">
+                        <i class="fas fa-user"></i> Citizen Login
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <i class="fas fa-balance-scale"></i>
+                Vidhi Saarathi AI
+            </div>
+            <div class="nav-section">
+                <ul class="nav-links">
+                    <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="auth.html"><i class="fas fa-user"></i> Citizen Login</a></li>
+                    <li><a href="dashboard.html" class="active"><i class="fas fa-gavel"></i> Lawyer Dashboard</a></li>
+                </ul>
+                <div class="user-info" id="user-info" style="display: none;">
+                    <div class="user-avatar" id="user-avatar">A</div>
+                    <span id="user-name">Adv. John Doe</span>
+                    <button class="logout-btn" onclick="logoutLawyer()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- DASHBOARD CONTENT -->
+    <div class="dashboard-container" id="dashboard-content">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">⚖️ Lawyer Dashboard</h1>
+            <p style="color: #6B7280; font-size: 1.1rem;">Professional Legal Practice Management</p>
+        </div>
+
+        <div class="welcome-card">
+            <h3 style="color: var(--primary-accent); margin-bottom: 1rem;">
+                <i class="fas fa-user-tie"></i> Welcome Back, <span id="welcome-name">Advocate</span>!
+            </h3>
+            <p style="color: #6B7280; line-height: 1.6;">
+                Your secure professional dashboard is ready. Manage your cases, connect with clients, 
+                and access advanced legal tools designed specifically for verified legal practitioners.
+            </p>
+        </div>
+
+        <div class="stats-grid">
+                    <div class="form-group password-group">
+                        <label class="form-label" for="signup-password">Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="signup-password" class="form-input" placeholder="Minimum 8 characters" minlength="8" required>
+                            <i class="fas fa-eye password-toggle" id="toggle-signup-password"></i>
+                        </div>
+                        <div class="error-message" id="password-error"></div>
+                    </div>
+
+                    <button type="submit" class="auth-btn"> <i class="fas fa-user-plus"></i> Create Professional Account</button>
+                    <div class="error-message" id="signup-general-error"></div>
+                    <div class="success-message" id="signup-success-message"></div>
+                </form>
+                </div>
+                <div class="stat-number">89%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+
+        <div class="coming-soon">
+            <h3>
+                <i class="fas fa-rocket"></i>
+                Advanced Features Coming Soon
+            </h3>
+            <p>
+                Your secure lawyer dashboard is being built with advanced case management, 
+                client communication tools, legal document automation, court date reminders, 
+                AI-powered legal research, and integrated billing systems.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let currentAuthSection = 'login';
+
+        // Check login status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            checkLoginStatus();
+            setupPasswordToggles();
+        });
+
+        // Switch between Login and Signup tabs
+        function switchTab(tab) {
+            const loginTab = document.getElementById('login-tab');
+            const signupTab = document.getElementById('signup-tab');
+            const loginSection = document.getElementById('login-section');
+            const signupSection = document.getElementById('signup-section');
+
+            if (tab === 'login') {
+                loginTab.classList.add('active');
+                signupTab.classList.remove('active');
+                loginSection.style.display = 'block';
+                signupSection.style.display = 'none';
+                currentAuthSection = 'login';
+            } else {
+                loginTab.classList.remove('active');
+                signupTab.classList.add('active');
+                loginSection.style.display = 'none';
+                signupSection.style.display = 'block';
+                currentAuthSection = 'signup';
+            }
+        }
+
+        // Setup Password Visibility Toggles
+        function setupPasswordToggles() {
+            // Signup password toggle
+            document.getElementById('toggle-signup-password').addEventListener('click', function() {
+                const passwordInput = document.getElementById('signup-password');
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+
+            // Signup confirm password toggle
+            document.getElementById('toggle-signup-confirm-password').addEventListener('click', function() {
+                const passwordInput = document.getElementById('signup-confirm-password');
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        }
+
+        // Check if lawyer is already logged in
+        function checkLoginStatus() {
+            const lawyerAuth = localStorage.getItem('lawyerAuth');
+            const authGate = document.getElementById('auth-gate');
+            const dashboardContent = document.getElementById('dashboard-content');
+            const userInfo = document.getElementById('user-info');
+
+            if (lawyerAuth) {
+                try {
+                    const lawyerData = JSON.parse(lawyerAuth);
+                    
+                    // Hide auth gate and show dashboard
+                    authGate.style.display = 'none';
+                    dashboardContent.style.display = 'block';
+                    userInfo.style.display = 'flex';
+                    
+                    // Update user info in navbar
+                    updateUserInfo(lawyerData);
+                    
+                    console.log('Lawyer already logged in:', lawyerData);
+                } catch (error) {
+                    console.error('Invalid lawyer auth data:', error);
+                    localStorage.removeItem('lawyerAuth');
+                }
+            } else {
+                // Show auth gate
+                authGate.style.display = 'flex';
+                dashboardContent.style.display = 'none';
+                userInfo.style.display = 'none';
+            }
+        }
+
+        // Update user info in navbar
+        function updateUserInfo(lawyerData) {
+            const userName = document.getElementById('user-name');
+            const welcomeName = document.getElementById('welcome-name');
+            const userAvatar = document.getElementById('user-avatar');
+
+            if (lawyerData.name) {
+                userName.textContent = lawyerData.name;
+                welcomeName.textContent = lawyerData.name;
+                userAvatar.textContent = lawyerData.name.charAt(0).toUpperCase();
+            }
+        }
+
+        // SIGNUP FORM SUBMISSION (with backend API call)
+        document.getElementById('signup-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearSignupErrors();
+
+            const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:3000' 
+                : '';
+
+            const formData = {
+                fullname: document.getElementById('signup-fullname').value.trim(),
+                email: document.getElementById('signup-email').value.trim(),
+                mobile: document.getElementById('signup-mobile').value.trim(),
+                barNumber: document.getElementById('signup-bar-number').value.trim(),
+                state: document.getElementById('signup-state').value,
+                specialization: document.getElementById('signup-specialization').value,
+                experience: document.getElementById('signup-experience').value,
+                password: document.getElementById('signup-password').value,
+                confirmPassword: document.getElementById('signup-confirm-password').value
+            };
+
+            // Detailed validation with specific error messages
+            if (!formData.fullname) {
+                showError('signup-general-error', '❌ Please enter your full name');
+                return;
+            }
+            
+            if (!formData.email) {
+                showError('signup-general-error', '❌ Please enter your email address');
+                return;
+            }
+            
+            if (!isValidEmail(formData.email)) {
+                showError('signup-general-error', '❌ Please enter a valid email address');
+                return;
+            }
+            
+            if (!formData.mobile) {
+                showError('signup-general-error', '❌ Please enter your mobile number');
+                return;
+            }
+            
+            if (!isValidMobile(formData.mobile)) {
+                showError('signup-general-error', '❌ Please enter a valid 10-digit mobile number');
+                return;
+            }
+            
+            if (!formData.barNumber) {
+                showError('signup-general-error', '❌ Please enter your Bar Council Registration Number');
+                return;
+            }
+            
+            if (!formData.state) {
+                showError('signup-general-error', '❌ Please select your State Bar Council');
+                return;
+            }
+            
+            if (!formData.specialization) {
+                showError('signup-general-error', '❌ Please select your domain specialization');
+                return;
+            }
+            
+            if (!formData.experience) {
+                showError('signup-general-error', '❌ Please select your years of experience');
+                return;
+            }
+            
+            if (!formData.password) {
+                showError('signup-general-error', '❌ Please enter a password');
+                return;
+            }
+            
+            if (formData.password.length < 8) {
+                showError('signup-general-error', '❌ Password must be at least 8 characters long');
+                return;
+            }
+            
+            if (!formData.confirmPassword) {
+                showError('signup-general-error', '❌ Please confirm your password');
+                return;
+            }
+            
+            if (formData.password !== formData.confirmPassword) {
+                showError('signup-general-error', '❌ Passwords do not match!');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('#signup-form button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+
+            try {
+                // Call backend API to register lawyer
+                const response = await fetch(`${API_BASE_URL}/api/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: formData.email,
+                        password: formData.password,
+                        name: formData.fullname,
+                        mobile: formData.mobile,
+                        barNumber: formData.barNumber,
+                        state: formData.state,
+                        specialization: formData.specialization,
+                        experience: formData.experience,
+                        userType: 'lawyer'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Store lawyer data with additional info
+                    const lawyerData = {
+                        id: result.user.id,
+                        name: result.user.name || formData.fullname,
+                        email: result.user.email,
+                        mobile: formData.mobile,
+                        barNumber: formData.barNumber,
+                        state: formData.state,
+                        specialization: formData.specialization,
+                        experience: formData.experience,
+                        verified: true,
+                        registrationTime: new Date().toISOString(),
+                        token: result.token
+                    };
+
+                    localStorage.setItem('lawyerAuth', JSON.stringify(lawyerData));
+                    document.getElementById('auth-gate').style.display = 'none';
+                    document.getElementById('dashboard-content').style.display = 'block';
+                    document.getElementById('user-info').style.display = 'flex';
+                    updateUserInfo(lawyerData);
+                    showSuccess('signup-success-message', '🎉 Registration successful! You are now logged in.');
+                    
+                    // Hide success message and reset form after 2 seconds
+                    setTimeout(() => {
+                        document.getElementById('signup-success-message').textContent = '';
+                    }, 2000);
+                } else {
+                    showError('signup-general-error', result.error || 'Registration failed. Please try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showError('signup-general-error', 'Network error. Please check your connection and try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
+        // LOGIN FORM SUBMISSION (with backend API call)
+        document.getElementById('bar-login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:3000' 
+                : '';
+
+            const email = document.getElementById('login-bar-number').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            // Show loading state
+            const submitBtn = document.querySelector('#bar-login-form button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
+            try {
+                // Call backend API to authenticate
+                const response = await fetch(`${API_BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Retrieve full lawyer data from localStorage if available, or use backend data
+                    const stored = JSON.parse(localStorage.getItem('lawyerAuth') || 'null');
+                    let lawyerData;
+
+                    if (stored && stored.email === result.user.email) {
+                        // Use stored data with updated token
+                        lawyerData = { ...stored, token: result.token };
+                    } else {
+                        // Create minimal lawyer data from backend response
+                        lawyerData = {
+                            id: result.user.id,
+                            name: result.user.name,
+                            email: result.user.email,
+                            verified: true,
+                            token: result.token
+                        };
+                    }
+
+                    localStorage.setItem('lawyerAuth', JSON.stringify(lawyerData));
+                    document.getElementById('auth-gate').style.display = 'none';
+                    document.getElementById('dashboard-content').style.display = 'block';
+                    document.getElementById('user-info').style.display = 'flex';
+                    updateUserInfo(lawyerData);
+                    
+                    // Show success message briefly
+                    alert('✅ Successfully logged in to Lawyer Dashboard!');
+                } else {
+                    alert('❌ Invalid credentials. Please check your email and password.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('❌ Network error. Please check your connection and try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
+        // Legacy OTP handlers removed; using password-based login/signup
+
+        // Helper functions
+        function showError(elementId, message) {
+            document.getElementById(elementId).textContent = message;
+        }
+
+        function showSuccess(elementId, message) {
+            document.getElementById(elementId).textContent = message;
+        }
+
+        function clearSignupErrors() {
+            const errorElements = ['fullname-error', 'email-error', 'mobile-error', 'bar-number-error', 
+                                   'state-error', 'specialization-error', 'experience-error', 'password-error', 
+                                   'confirm-password-error', 'signup-general-error', 'signup-success-message'];
+            errorElements.forEach(elementId => {
+                document.getElementById(elementId).textContent = '';
+            });
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function isValidMobile(mobile) {
+            const mobileRegex = /^[0-9]{10}$/;
+            return mobileRegex.test(mobile.replace(/\D/g, ''));
+        }
+
+        // Logout function
+        function logoutLawyer() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear auth data
+                localStorage.removeItem('lawyerAuth');
+                localStorage.removeItem('signupData');
+                
+                // Reload page to show auth gate
+                window.location.reload();
+            }
+        }
+
+        // OTP utilities removed - authentication simplified to password-based flows
+
+        // Theme toggle functionality
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+                themeIcon.className = 'fas fa-sun';
+            }
+        }
+
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            const isDarkMode = body.classList.toggle('dark-mode');
+            themeIcon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        });
+
+        console.log('🏛️ Lawyer Dashboard Loaded - Complete Auth System (Login + Signup + Specialization + Password Toggle) Active');
+    </script>
+</body>
+</html>
