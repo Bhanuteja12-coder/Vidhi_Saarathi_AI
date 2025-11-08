@@ -7,7 +7,7 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware
+// Enhanced CORS Configuration
 app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
@@ -40,8 +40,26 @@ app.use(cors({
             callback(new Error('Not allowed by CORS'));
         }
     },
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    maxAge: 600, // 10 minutes
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 }));
+
+// Additional CORS headers for extra compatibility
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+        return res.status(204).end();
+    }
+    next();
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
@@ -885,7 +903,7 @@ app.get('/health', (req, res) => {
 
     res.json({
         status: "Vidhi Saarathi AI Backend is healthy",
-        version: "4.3.0",
+        version: "4.3.1",
         features: {
             enhancedTimeouts: true,
             intelligentRetry: true,
@@ -1107,7 +1125,7 @@ app.get('/api/lawyers/:id', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log('\n🎉 ==========================================');
-    console.log('🏛️  VIDHI SAARATHI AI BACKEND SERVER v4.3');
+    console.log('🏛️  VIDHI SAARATHI AI BACKEND SERVER v4.3.1');
     console.log('🎉 ==========================================');
     console.log(`🚀 Server running on: http://localhost:${PORT}`);
     console.log(`🤖 Enhanced AI Models: ${AI_MODELS.length} with custom timeouts`);
