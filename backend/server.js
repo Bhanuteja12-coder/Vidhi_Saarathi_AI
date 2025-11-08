@@ -11,7 +11,11 @@ const app = express();
 app.use(cors({
     origin: [
         'http://localhost:3000',
-        'https://vidhi-saarathi-ai1.vercel.app/',  // Your Vercel URL
+        'http://localhost:5500',
+        'http://127.0.0.1:5500',
+        'https://vidhi-saarathi-ai.vercel.app',
+        'https://vidhi-saarathi-ai1.vercel.app',
+        'https://vidhi-saarathi-ai-git-main.vercel.app'
     ],
     credentials: true
 }));
