@@ -1,36 +1,28 @@
 {
   "version": 2,
   "name": "vidhi-saarathi-ai",
-  "builds": [
+  "buildCommand": "echo 'No build needed for static site'",
+  "outputDirectory": "frontend",
+  "rewrites": [
     {
-      "src": "frontend/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/frontend/index.html"
+      "source": "/",
+      "destination": "/index.html"
     },
     {
-      "src": "/results",
-      "dest": "/frontend/results.html"
+      "source": "/results",
+      "destination": "/results.html"
     },
     {
-      "src": "/auth",
-      "dest": "/frontend/auth.html"
+      "source": "/auth",
+      "destination": "/auth.html"
     },
     {
-      "src": "/dashboard",
-      "dest": "/frontend/dashboard.html"
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
     },
     {
-      "src": "/upload",
-      "dest": "/frontend/upload.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "source": "/upload",
+      "destination": "/upload.html"
     }
   ],
   "headers": [
@@ -48,6 +40,10 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
         }
       ]
     }
