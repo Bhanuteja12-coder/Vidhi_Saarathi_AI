@@ -862,7 +862,7 @@ app.get('/health', (req, res) => {
 
     res.json({
         status: "Vidhi Saarathi AI Backend is healthy",
-        version: "4.1.0",
+        version: "4.2.0",
         features: {
             enhancedTimeouts: true,
             intelligentRetry: true,
@@ -1084,7 +1084,7 @@ app.get('/api/lawyers/:id', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log('\n🎉 ==========================================');
-    console.log('🏛️  VIDHI SAARATHI AI BACKEND SERVER v4.1');
+    console.log('🏛️  VIDHI SAARATHI AI BACKEND SERVER v4.2');
     console.log('🎉 ==========================================');
     console.log(`🚀 Server running on: http://localhost:${PORT}`);
     console.log(`🤖 Enhanced AI Models: ${AI_MODELS.length} with custom timeouts`);
