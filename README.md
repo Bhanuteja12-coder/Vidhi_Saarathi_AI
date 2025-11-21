@@ -101,7 +101,7 @@ Vidhi_Saarathi_AI/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Akash-N-24/Vidhi_Saarathi_AI.git
+   git clone https://github.com/Bhanuteja12-coder/Vidhi_Saarathi_AI.git
    cd Vidhi_Saarathi_AI
    ```
 
