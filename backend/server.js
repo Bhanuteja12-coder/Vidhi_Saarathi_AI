@@ -436,6 +436,26 @@ const API_KEYS = [
     }
 ].filter(keyConfig => keyConfig.key); // Remove undefined keys
 
+// ✅ ML MODEL CONFIGURATION (USED AS REFERENCE/HINT FOR AI ANALYSIS)
+const ML_MODEL_CONFIG = {
+    enabled: process.env.ML_MODEL_ENABLED === 'true',
+    endpoint: process.env.ML_MODEL_ENDPOINT || 'https://your-model.onrender.com/predict',
+    timeout: 30000, // 30 seconds
+    useAsReference: true, // ML predictions are hints, not final answers
+    urgencyScale: 5, // Model uses 0-5 urgency scale
+    usageStats: {
+        totalCalls: 0,
+        successCalls: 0,
+        failedCalls: 0,
+        avgResponseTime: 0
+    }
+};
+
+console.log('🤖 ML Model Status:', ML_MODEL_CONFIG.enabled ? '✅ ENABLED' : '❌ DISABLED');
+if (ML_MODEL_CONFIG.enabled) {
+    console.log('📡 ML Model Endpoint:', ML_MODEL_CONFIG.endpoint);
+}
+
 // ✅ ENHANCED FETCH WITH CUSTOM TIMEOUT AND ABORT CONTROLLER
 async function fetchWithEnhancedTimeout(url, options = {}) {
     const { timeout = 120000, ...fetchOptions } = options;
@@ -614,7 +634,70 @@ async function callAIWithAdvancedFallback(prompt) {
     throw new Error(`All AI models and keys failed after ${totalAttempts} attempts. Key stats: ${keyStats}. Last error: ${lastError?.message || 'Unknown error'}`);
 }
 
-// ✅ ENHANCED LEGAL ANALYSIS ENDPOINT WITH OPTIMIZED PROMPT
+// ✅ ML MODEL PREDICTION FUNCTION (PROVIDES REFERENCE HINTS FOR AI)
+async function predictWithMLModel(query) {
+    if (!ML_MODEL_CONFIG.enabled) {
+        return { success: false, error: 'ML model disabled' };
+    }
+
+    const startTime = Date.now();
+    ML_MODEL_CONFIG.usageStats.totalCalls++;
+
+    try {
+        console.log('🤖 Calling ML model for reference suggestions (domain & urgency hints)...');
+        
+        const response = await fetchWithEnhancedTimeout(ML_MODEL_CONFIG.endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                // Add any additional fields your model expects
+            }),
+            timeout: ML_MODEL_CONFIG.timeout
+        });
+
+        const responseTime = Date.now() - startTime;
+
+        if (response.ok) {
+            const data = await response.json();
+            
+            ML_MODEL_CONFIG.usageStats.successCalls++;
+            
+            // Update average response time
+            const totalSuccess = ML_MODEL_CONFIG.usageStats.successCalls;
+            ML_MODEL_CONFIG.usageStats.avgResponseTime = 
+                ((ML_MODEL_CONFIG.usageStats.avgResponseTime * (totalSuccess - 1)) + responseTime) / totalSuccess;
+
+            console.log(`✅ ML Model prediction successful (${responseTime}ms)`);
+            console.log(`📊 Domain: ${data.domain || 'N/A'}, Urgency: ${data.urgency_score || 'N/A'}`);
+
+            return {
+                success: true,
+                domain: data.domain || data.predicted_domain || data.classification,
+                urgencyScore: data.urgency_score || data.urgency || data.priority_score,
+                confidence: data.confidence || data.probability,
+                subCategory: data.sub_category || data.subcategory,
+                responseTime: responseTime,
+                rawResponse: data
+            };
+        } else {
+            throw new Error(`ML model returned ${response.status}: ${response.statusText}`);
+        }
+    } catch (error) {
+        ML_MODEL_CONFIG.usageStats.failedCalls++;
+        console.error('❌ ML Model prediction failed:', error.message);
+        
+        return {
+            success: false,
+            error: error.message,
+            responseTime: Date.now() - startTime
+        };
+    }
+}
+
+// ✅ ENHANCED LEGAL ANALYSIS ENDPOINT WITH ML MODEL INTEGRATION
 app.post('/api/analyze', async (req, res) => {
     const startTime = Date.now();
     
@@ -640,8 +723,92 @@ app.post('/api/analyze', async (req, res) => {
         console.log(`📝 Query: "${query.substring(0, 100)}${query.length > 100 ? '...' : ''}"`);
         console.log(`📏 Query length: ${query.length} characters`);
 
-        // ✅ OPTIMIZED LEGAL ANALYSIS PROMPT (REDUCED SIZE FOR BETTER PERFORMANCE)
-        const legalPrompt = `You are Vidhi Saarathi AI, expert in Indian law. Analyze this legal query concisely but comprehensively:
+        // ✅ STEP 1: GET ML MODEL SUGGESTIONS (USED AS REFERENCE HINTS)
+        let mlPrediction = null;
+        let hasMlHints = false;
+        
+        if (ML_MODEL_CONFIG.enabled) {
+            mlPrediction = await predictWithMLModel(query);
+            hasMlHints = mlPrediction.success;
+            
+            if (hasMlHints) {
+                console.log('✅ Got ML model suggestions (will use as reference hints for AI)');
+                console.log(`   ML suggests: ${mlPrediction.domain}, Urgency: ${mlPrediction.urgencyScore}/5`);
+            } else {
+                console.log('⚠️ ML model unavailable, AI will analyze independently');
+            }
+        }
+
+        // ✅ STEP 2: PREPARE LEGAL ANALYSIS PROMPT (WITH ML HINTS IF AVAILABLE)
+        let legalPrompt;
+        
+        if (hasMlHints && mlPrediction.domain && mlPrediction.urgencyScore) {
+            // Include ML suggestions as reference hints (AI can agree or disagree)
+            legalPrompt = `You are Vidhi Saarathi AI, expert in Indian law. Analyze this legal query:
+
+"${query}"
+
+**ML Model Initial Suggestions (for reference only - may not be accurate):**
+- Suggested Domain: ${mlPrediction.domain}
+- Suggested Urgency: ${mlPrediction.urgencyScore}/5 (scale 0-5)
+${mlPrediction.confidence ? '- ML Confidence: ' + (mlPrediction.confidence * 100).toFixed(1) + '%' : ''}
+
+**Important:** These are automated suggestions from a trained model. You should:
+1. Independently analyze the legal domain and urgency
+2. Consider the ML suggestions but override if incorrect
+3. Provide your expert legal analysis (use 0-10 scale for your urgency assessment)
+
+Provide structured analysis in HTML format:
+
+<div class="legal-analysis">
+
+<div class="domain-section">
+<h3>🏛️ Legal Domain</h3>
+<p><strong>Primary Domain:</strong> <span class="domain-badge">[Determine correct domain - ML suggested: ${mlPrediction.domain}]</span></p>
+<p><strong>Sub-Category:</strong> [Specify based on your expert analysis]</p>
+<p><strong>Brief Explanation:</strong> [2-3 sentences explaining the legal area]</p>
+</div>
+
+<div class="priority-section">
+<h3>⚠️ Priority Assessment</h3>
+<div class="priority-badge">[High/Medium/Low] Priority</div>
+<p><strong>Urgency Score:</strong> [Your expert assessment]/10 <em>(ML suggested: ${mlPrediction.urgencyScore}/5)</em></p>
+<p><strong>Reasoning:</strong> [Explain why this urgency level based on legal context and facts]</p>
+</div>
+
+<div class="explanation-section">
+<h3>⚖️ Legal Analysis</h3>
+<p>[Explain legal issues in simple terms. Include 2-3 most relevant sections of IPC/CPC/Constitution]</p>
+</div>
+
+<div class="actions-section">
+<h3>📋 Recommended Actions</h3>
+<ol>
+<li><strong>Immediate:</strong> [What to do now based on urgency]</li>
+<li><strong>Documentation:</strong> [Key documents needed]</li>
+<li><strong>Legal Process:</strong> [Next legal steps]</li>
+<li><strong>Timeline:</strong> [Important deadlines]</li>
+</ol>
+</div>
+
+<div class="laws-section">
+<h3>📖 Relevant Laws</h3>
+<ul>
+<li>[Most applicable IPC sections]</li>
+<li>[Relevant CPC/Constitution articles]</li>
+<li>[Other applicable laws]</li>
+</ul>
+</div>
+
+<div class="disclaimer-section">
+<h3>⚠️ Important Notice</h3>
+<p><em>This analysis uses AI legal expertise with ML-assisted suggestions. Consult a qualified lawyer for specific legal advice.</em></p>
+</div>
+
+</div>`;
+        } else {
+            // Original AI-only prompt
+            legalPrompt = `You are Vidhi Saarathi AI, expert in Indian law. Analyze this legal query concisely but comprehensively:
 
 "${query}"
 
@@ -740,6 +907,9 @@ Provide structured analysis in HTML format:
 
 
 Keep response comprehensive but concise for optimal performance.`;
+        }
+        
+        // ✅ STEP 3: CALL AI SYSTEM WITH PREPARED PROMPT
         // Call enhanced AI system
         const aiResult = await callAIWithAdvancedFallback(legalPrompt);
         
@@ -755,6 +925,13 @@ Keep response comprehensive but concise for optimal performance.`;
         res.json({
             success: true,
             analysis: aiResult.analysis,
+            mlSuggestions: hasMlHints ? {
+                suggestedDomain: mlPrediction.domain,
+                suggestedUrgency: mlPrediction.urgencyScore,
+                confidence: mlPrediction.confidence,
+                responseTime: mlPrediction.responseTime,
+                note: 'ML suggestions provided as reference - AI makes final determination'
+            } : { available: false, reason: mlPrediction?.error || 'ML model disabled' },
             metadata: {
                 model: aiResult.model,
                 keyUsed: aiResult.keyUsed,
@@ -762,12 +939,14 @@ Keep response comprehensive but concise for optimal performance.`;
                 retryCount: aiResult.retryCount,
                 processingTime: processingTime,
                 aiRequestTime: aiResult.requestTime,
+                mlHintsProvided: hasMlHints,
                 timestamp: aiResult.timestamp,
                 queryLength: query.length
             },
             systemInfo: {
                 totalModels: AI_MODELS.length,
                 totalKeys: API_KEYS.length,
+                mlModelEnabled: ML_MODEL_CONFIG.enabled,
                 enhancedTimeouts: true,
                 intelligentRetry: true,
                 multiModelFallback: true
@@ -909,8 +1088,20 @@ app.get('/health', (req, res) => {
             intelligentRetry: true,
             multiModelAI: `${AI_MODELS.length} models configured`,
             multiKeyRotation: `${API_KEYS.length} keys configured`,
+            mlDomainClassification: ML_MODEL_CONFIG.enabled,
             optimizedPrompts: true
         },
+        mlModelStats: ML_MODEL_CONFIG.enabled ? {
+            endpoint: ML_MODEL_CONFIG.endpoint,
+            totalCalls: ML_MODEL_CONFIG.usageStats.totalCalls,
+            successCalls: ML_MODEL_CONFIG.usageStats.successCalls,
+            failedCalls: ML_MODEL_CONFIG.usageStats.failedCalls,
+            successRate: ML_MODEL_CONFIG.usageStats.totalCalls > 0 
+                ? `${((ML_MODEL_CONFIG.usageStats.successCalls / ML_MODEL_CONFIG.usageStats.totalCalls) * 100).toFixed(1)}%` 
+                : '0%',
+            avgResponseTime: `${ML_MODEL_CONFIG.usageStats.avgResponseTime.toFixed(0)}ms`,
+            fallbackEnabled: ML_MODEL_CONFIG.fallbackToAI
+        } : { enabled: false },
         keyUsageStats: keyStats,
         modelInfo: AI_MODELS.map(m => ({
             name: m.name,
@@ -1026,6 +1217,53 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend', 'dashboard.html'));
 });
 
+// ✅ ML MODEL TEST ENDPOINT
+app.post('/api/ml-test', async (req, res) => {
+    try {
+        const { query } = req.body;
+        
+        if (!query) {
+            return res.status(400).json({
+                success: false,
+                error: 'Query is required'
+            });
+        }
+
+        if (!ML_MODEL_CONFIG.enabled) {
+            return res.json({
+                success: false,
+                error: 'ML model is disabled. Set ML_MODEL_ENABLED=true in environment variables.'
+            });
+        }
+
+        const result = await predictWithMLModel(query);
+        
+        res.json({
+            success: result.success,
+            prediction: result.success ? {
+                domain: result.domain,
+                urgencyScore: result.urgencyScore,
+                confidence: result.confidence,
+                subCategory: result.subCategory,
+                responseTime: result.responseTime
+            } : null,
+            error: result.error || null,
+            modelConfig: {
+                endpoint: ML_MODEL_CONFIG.endpoint,
+                timeout: ML_MODEL_CONFIG.timeout,
+                fallbackEnabled: ML_MODEL_CONFIG.fallbackToAI
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('ML test error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // ✅ 404 HANDLER (MUST BE AT THE END)
 app.all('*', (req, res) => {
     console.log(`❌ 404 - Route not found: ${req.method} ${req.originalUrl}`);
@@ -1036,7 +1274,8 @@ app.all('*', (req, res) => {
         availableRoutes: [
             'GET /health - Enhanced system health check',
             'GET /api/quota - API key quota monitoring',
-            'POST /api/analyze - Legal analysis with enhanced timeout', 
+            'POST /api/analyze - Legal analysis with ML + AI hybrid', 
+            'POST /api/ml-test - Test ML model predictions',
             'POST /api/auth - Authentication system',
             'GET /api/dashboard - Dashboard data',
             'GET /debug/ip - Server IP information',
@@ -1132,11 +1371,12 @@ app.listen(PORT, () => {
     console.log(`   - ${AI_MODELS.map(m => `${m.name} (${m.timeout/1000}s)`).join(', ')}`);
     console.log(`🔑 API Keys: ${API_KEYS.length} with intelligent retry`);
     console.log('⚡ New Features:');
+    console.log('   - ML Model for Domain Classification (10K queries trained)');
+    console.log('   - ML-powered Urgency Scoring');
+    console.log('   - Hybrid ML + AI Analysis Pipeline');
     console.log('   - Enhanced timeout handling (up to 3 minutes)');
     console.log('   - Intelligent retry with exponential backoff');
-    console.log('   - Optimized prompts for better performance');
     console.log('   - Real-time quota monitoring');
-    console.log('   - Advanced error handling and recovery');
     console.log('📡 Enhanced API Endpoints:');
     console.log('   POST /api/analyze - Legal Analysis (Enhanced)');
     console.log('   GET /health - System Health & Detailed Stats');

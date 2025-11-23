@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Model Test - Vidhi Saarathi AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .test-card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .result-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #555;
+            margin-right: 10px;
+        }
+
+        .result-value {
+            color: #333;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            color: #721c24;
+        }
+
+        .sample-queries {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .sample-query {
+            padding: 8px 15px;
+            background: #e8eaf6;
+            border: 1px solid #667eea;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sample-query:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .config-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .config-info strong {
+            color: #1976d2;
+        }
+
+        .urgency-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .urgency-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .urgency-low { background: #4caf50; }
+        .urgency-medium { background: #ff9800; }
+        .urgency-high { background: #f44336; }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 ML Model Test</h1>
+            <p>Test your domain classification & urgency scoring model</p>
+        </div>
+
+        <div class="test-card">
+            <h2>🧪 Test ML Model Prediction</h2>
+            
+            <div class="form-group">
+                <label for="queryInput">Legal Query:</label>
+                <textarea 
+                    id="queryInput" 
+                    placeholder="Enter a legal query to test domain classification and urgency scoring..."></textarea>
+            </div>
+
+            <div class="sample-queries">
+                <div class="sample-query" onclick="fillQuery('Someone filed a false FIR against me')">
+                    🚔 False FIR
+                </div>
+                <div class="sample-query" onclick="fillQuery('My landlord is not returning my security deposit')">
+                    🏠 Property Dispute
+                </div>
+                <div class="sample-query" onclick="fillQuery('I want to file for divorce')">
+                    👨‍👩‍👧 Family Law
+                </div>
+                <div class="sample-query" onclick="fillQuery('My employer is not paying my salary')">
+                    💼 Labor Law
+                </div>
+                <div class="sample-query" onclick="fillQuery('Contract dispute with vendor')">
+                    📄 Civil Law
+                </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 20px;">
+                <button class="btn-primary" onclick="testMLModel()">
+                    🤖 Test ML Model Only
+                </button>
+                <button class="btn-primary" onclick="testFullAnalysis()">
+                    🔍 Test Full Analysis (ML + AI)
+                </button>
+                <button class="btn-secondary" onclick="clearResults()">
+                    🗑️ Clear
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Testing ML model...</p>
+            </div>
+
+            <div class="results" id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : 'https://vidhi-saarathi-ai-backend.onrender.com';
+
+        function fillQuery(text) {
+            document.getElementById('queryInput').value = text;
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('results').classList.remove('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+
+        function clearResults() {
+            document.getElementById('queryInput').value = '';
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testMLModel() {
+            const query = document.getElementById('queryInput').value.trim();
+            
+            if (!query) {
+                alert('Please enter a legal query');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch(`${API_BASE}/api/ml-test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                const data = await response.json();
+                hideLoading();
+
+                displayMLResults(data, query);
+            } catch (error) {
+                hideLoading();
+                displayError('Network error: ' + error.message);
+            }
+        }
+
+        async function testFullAnalysis() {
+            const query = document.getElementById('queryInput').value.trim();
+            
+            if (!query) {
+                alert('Please enter a legal query');
+                return;
+            }
+
+            showLoading();
+            document.getElementById('loading').querySelector('p').textContent = 'Running full analysis (ML + AI)...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                const data = await response.json();
+                hideLoading();
+
+                displayFullResults(data, query);
+            } catch (error) {
+                hideLoading();
+                displayError('Network error: ' + error.message);
+            }
+        }
+
+        function displayMLResults(data, query) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.classList.add('show');
+
+            if (data.success && data.prediction) {
+                const pred = data.prediction;
+                const urgencyLevel = pred.urgencyScore >= 4 ? 'high' : pred.urgencyScore >= 2 ? 'medium' : 'low';
+                const urgencyPercent = (pred.urgencyScore / 5) * 100;
+
+                resultsDiv.innerHTML = `
+                    <h3>✅ ML Model Prediction Results</h3>
+                    
+                    <div class="result-item">
+                        <span class="result-label">📝 Query:</span>
+                        <span class="result-value">"${query}"</span>
+                    </div>
+
+                    <div class="result-item">
+                        <span class="result-label">🏛️ Domain:</span>
+                        <span class="result-value">${pred.domain}</span>
+                        <span class="badge badge-info">${pred.subCategory || 'N/A'}</span>
+                    </div>
+
+                    <div class="result-item">
+                        <span class="result-label">⚡ Urgency Score:</span>
+                        <span class="result-value">${pred.urgencyScore}/5</span>
+                        <span class="badge badge-${urgencyLevel === 'high' ? 'danger' : urgencyLevel === 'medium' ? 'warning' : 'success'}">
+                            ${urgencyLevel.toUpperCase()} PRIORITY
+                        </span>
+                        <div class="urgency-bar">
+                            <div class="urgency-fill urgency-${urgencyLevel}" style="width: ${urgencyPercent}%"></div>
+                        </div>
+                    </div>
+
+                    ${pred.confidence ? `
+                    <div class="result-item">
+                        <span class="result-label">🎯 Confidence:</span>
+                        <span class="result-value">${(pred.confidence * 100).toFixed(1)}%</span>
+                    </div>
+                    ` : ''}
+
+                    <div class="result-item">
+                        <span class="result-label">⏱️ Response Time:</span>
+                        <span class="result-value">${pred.responseTime}ms</span>
+                    </div>
+
+                    <div class="config-info">
+                        <strong>🔧 Model Configuration:</strong><br>
+                        Endpoint: ${data.modelConfig.endpoint}<br>
+                        Timeout: ${data.modelConfig.timeout}ms<br>
+                        Fallback: ${data.modelConfig.fallbackEnabled ? 'Enabled' : 'Disabled'}
+                    </div>
+
+                    <details>
+                        <summary style="cursor: pointer; margin-top: 15px; font-weight: 600;">
+                            📊 Raw JSON Response
+                        </summary>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </details>
+                `;
+            } else {
+                resultsDiv.innerHTML = `
+                    <h3>❌ ML Model Test Failed</h3>
+                    <div class="error">
+                        <strong>Error:</strong> ${data.error || 'Unknown error'}<br><br>
+                        ${data.error.includes('disabled') ? `
+                            <strong>💡 Solution:</strong> Set ML_MODEL_ENABLED=true in environment variables
+                        ` : ''}
+                    </div>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            }
+        }
+
+        function displayFullResults(data, query) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.classList.add('show');
+
+            if (data.success) {
+                const mlUsed = data.mlPrediction && data.mlPrediction.used;
+
+                resultsDiv.innerHTML = `
+                    <h3>✅ Full Analysis Results</h3>
+                    
+                    <div class="result-item">
+                        <span class="result-label">📝 Query:</span>
+                        <span class="result-value">"${query}"</span>
+                    </div>
+
+                    ${mlUsed ? `
+                    <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <h4 style="color: #2e7d32; margin-bottom: 10px;">🤖 ML Model Predictions (10K queries trained)</h4>
+                        
+                        <div class="result-item" style="background: white;">
+                            <span class="result-label">🏛️ Domain:</span>
+                            <span class="result-value">${data.mlPrediction.domain}</span>
+                        </div>
+
+                        <div class="result-item" style="background: white;">
+                            <span class="result-label">⚡ Urgency:</span>
+                            <span class="result-value">${data.mlPrediction.urgencyScore}/5</span>
+                            <span class="badge badge-${data.mlPrediction.urgencyScore >= 4 ? 'danger' : data.mlPrediction.urgencyScore >= 2 ? 'warning' : 'success'}">
+                                ${data.mlPrediction.urgencyScore >= 4 ? 'HIGH' : data.mlPrediction.urgencyScore >= 2 ? 'MEDIUM' : 'LOW'}
+                            </span>
+                        </div>
+
+                        ${data.mlPrediction.confidence ? `
+                        <div class="result-item" style="background: white;">
+                            <span class="result-label">🎯 Confidence:</span>
+                            <span class="result-value">${(data.mlPrediction.confidence * 100).toFixed(1)}%</span>
+                        </div>
+                        ` : ''}
+
+                        <div class="result-item" style="background: white;">
+                            <span class="result-label">⏱️ ML Response:</span>
+                            <span class="result-value">${data.mlPrediction.responseTime}ms</span>
+                        </div>
+                    </div>
+                    ` : `
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <strong>⚠️ ML Model Not Used:</strong> ${data.mlPrediction?.reason || 'Unknown'}
+                    </div>
+                    `}
+
+                    <div class="result-item">
+                        <span class="result-label">🤖 AI Model:</span>
+                        <span class="result-value">${data.metadata.model}</span>
+                        <span class="badge badge-info">${data.metadata.keyUsed}</span>
+                    </div>
+
+                    <div class="result-item">
+                        <span class="result-label">⏱️ Total Processing:</span>
+                        <span class="result-value">${data.metadata.processingTime}ms</span>
+                    </div>
+
+                    <div class="result-item">
+                        <span class="result-label">🔄 Attempts:</span>
+                        <span class="result-value">${data.metadata.totalAttempts}</span>
+                    </div>
+
+                    <details open>
+                        <summary style="cursor: pointer; margin-top: 15px; font-weight: 600;">
+                            📋 AI Legal Analysis
+                        </summary>
+                        <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px;">
+                            ${data.analysis}
+                        </div>
+                    </details>
+
+                    <details>
+                        <summary style="cursor: pointer; margin-top: 15px; font-weight: 600;">
+                            📊 Full JSON Response
+                        </summary>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </details>
+                `;
+            } else {
+                displayError(data.error || 'Analysis failed');
+            }
+        }
+
+        function displayError(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.classList.add('show');
+            resultsDiv.innerHTML = `
+                <h3>❌ Error</h3>
+                <div class="error">${message}</div>
+            `;
+        }
+    </script>
+</body>
+</html>
