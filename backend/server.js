@@ -676,7 +676,7 @@ async function predictWithMLModel(query) {
             return {
                 success: true,
                 domain: data.domain || data.predicted_domain || data.classification,
-                urgencyScore: data.urgency_score || data.urgency || data.priority_score,
+                urgencyScore: data.urgency || data.urgency_score || data.priority_score,
                 confidence: data.confidence || data.probability,
                 subCategory: data.sub_category || data.subcategory,
                 responseTime: responseTime,
